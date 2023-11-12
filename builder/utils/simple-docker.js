@@ -1,5 +1,6 @@
 import Dockerode from 'dockerode';
 import { exec } from 'child_process';
+import { join } from 'path';
 
 export default class SimpleDocker {
     /** @type {Dockerode} */
@@ -38,7 +39,7 @@ export default class SimpleDocker {
      *  @returns {Promise<String>} */
     async buildxImage(config, options, platforms = []) {
         const buildArgsString = Object.keys(options.buildargs).map(buildArgName => `--build-arg ${buildArgName}=${options.buildargs[buildArgName]}`).join(' ');
-        const buildxCommand = `docker buildx build --platform ${platforms.join(',')} ${buildArgsString} -t ${options.t} -f ${config.dockerfile} ${config.context}`;
+        const buildxCommand = `docker buildx build --platform ${platforms.join(',')} ${buildArgsString} -t ${options.t} -f ${join(config.context, config.dockerfile)} ${config.context}`;
         return await new Promise((resolve, reject) => {
             exec(buildxCommand, (err, stdout, stderr) => {
                 if (err) {
