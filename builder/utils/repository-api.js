@@ -40,7 +40,11 @@ export default class RepositoryAPI {
      *  @param {String} container
      *  @returns {Promise<Array<String>>} */
     async getGitHubVersions(username, container) {
-        const response =
+        /** @type {Array<String>} */
+        let tags = [];
+        
+        try {
+            const response =
             await this.#agent.get(`https://api.github.com/users/${username}/packages/container/${container}/versions`, {
                 headers: {
                     "Authorization": `Bearer ${this.#githubToken}`,
@@ -48,16 +52,15 @@ export default class RepositoryAPI {
                 }
             });
 
-        /** @type {Array<String>} */
-        let tags = [];
-        
-        if (response.status === 404) return tags;
-
-        response.data.forEach(version => {
-            /** @type {Array<String>} */
-            const versionTags = version.metadata.container.tags;
-            tags.push(...versionTags);
-        })
+            response.data.forEach(version => {
+                /** @type {Array<String>} */
+                const versionTags = version.metadata.container.tags;
+                tags.push(...versionTags);
+            })
+        }
+        catch (e) {
+            console.warn(`Failed to fetch published image versions. Are there even any images yet?`, e);
+        }
         
         return tags;
     }
