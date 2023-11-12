@@ -31,6 +31,10 @@ const githubVersions = await repo.getGitHubVersions(GITHUB_USER, IMAGE_NAME);
 // used to cache java versions
 const javaCache = {};
 
+// login to registries
+await docker.login(DOCKER_NAMESPACE, DOCKER_TOKEN, "");
+await docker.login(GITHUB_USER, GITHUB_TOKEN, "ghcr.io");
+
 // build images
 for (const paperVersion of await paper.getPaperVersions()) {
     console.log(`Paper ${paperVersion}`)
@@ -49,50 +53,43 @@ for (const paperVersion of await paper.getPaperVersions()) {
             /** @type {Number} */
             const javaVersion = javaCache[paperVersion] ?? (javaCache[paperVersion] = await mojang.getJavaVersion(paperVersion));
 
+            // image config
             const tagString = `${IMAGE_NAME}:${paperVersion}-${paperBuild}`;
-            try {
-                // build images using docker
-                await docker.buildxImage(
-                    {
-                        context: join('..', 'container'),
-                        dockerfile: 'Dockerfile'
-                    },
-                    {
-                        t: tagString,
-                        buildargs: {
-                            "JAVA_VERSION": `${javaVersion}`,
-                            "PAPER_VERSION": `${paperVersion}`,
-                            "PAPER_BUILD": `${paperBuild}`
-                        }
-                    },
-                    IMAGE_PLATFORMS.split(',')
-                );
+            const buildConfig = { context: join('..', 'container'), dockerfile: 'Dockerfile' };
+            const buildArgs = { "JAVA_VERSION": `${javaVersion}`, "PAPER_VERSION": `${paperVersion}`, "PAPER_BUILD": `${paperBuild}` };
 
+            try {
                 // push image
                 if (buildForDockerHub) {
-                    console.log(`   > Pushing to Docker Hub`)
+                    console.log(`> Pushing to Docker Hub`)
                     try {
-                        await docker.pushImage(tagName, {
-                            tag: tagName,
-                            authconfig: {
-                                username: DOCKER_NAMESPACE,
-                                password: DOCKER_TOKEN
-                            }
-                        });
+                        // build images using docker
+                        await docker.buildxImage(
+                            buildConfig,
+                            {
+                                t: `${DOCKER_NAMESPACE}/${tagString}`,
+                                buildargs: buildArgs
+                            },
+                            IMAGE_PLATFORMS.split(','),
+                            true
+                        );
                     } catch (e) {
                         console.log(e);
                     }
                 }
                 if (buildForGitHub) {
                     try {
-                        console.log(`   > Pushing to GitHub`)
-                        await docker.pushImage(tagName, {
-                            tag: `ghcr.io/${tagName}`,
-                            authconfig: {
-                                username: GITHUB_USER,
-                                password: GITHUB_TOKEN
-                            }
-                        });
+                        console.log(` > Pushing to GitHub`)
+                        // build images using docker
+                        await docker.buildxImage(
+                            buildConfig,
+                            {
+                                t: `ghcr.io/${GITHUB_USER}/${tagString}`,
+                                buildargs: buildArgs
+                            },
+                            IMAGE_PLATFORMS.split(','),
+                            true
+                        );
                     } catch (e) {
                         console.log(e);
                     }
