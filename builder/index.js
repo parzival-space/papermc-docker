@@ -64,7 +64,7 @@ for (const paperVersion of await paper.getPaperVersions()) {
             try {
                 // push image
                 if (buildForDockerHub) {
-                    console.log(`> Pushing to Docker Hub`)
+                    console.log(`   > Pushing to Docker Hub`)
                     try {
                         // build images using docker
                         await docker.buildxImage(
@@ -76,13 +76,31 @@ for (const paperVersion of await paper.getPaperVersions()) {
                             IMAGE_PLATFORMS.split(','),
                             true
                         );
+
+                        // publish if latest for build
+                        if (paperBuild.latest) {
+                            // dockher hub
+                            console.log(`     > Marking as latest for Docker Hub`)
+                            await docker.buildxImage(
+                                buildConfig,
+                                {
+                                    t: `${DOCKER_NAMESPACE}/${IMAGE_NAME}:${paperVersion}`,
+                                    buildargs: buildArgs
+                                },
+                                IMAGE_PLATFORMS.split(','),
+                                true
+                            );
+                        }
                     } catch (e) {
                         console.log(e);
                     }
+                } else {
+                    console.log(`   > Not pushing to Docker Hub`)
                 }
+
                 if (buildForGitHub) {
                     try {
-                        console.log(` > Pushing to GitHub`)
+                        console.log(`   > Pushing to GitHub`)
                         // build images using docker
                         await docker.buildxImage(
                             buildConfig,
@@ -93,43 +111,31 @@ for (const paperVersion of await paper.getPaperVersions()) {
                             IMAGE_PLATFORMS.split(','),
                             true
                         );
+
+                        // publish if latest for build
+                        if (paperBuild.latest) {
+                            // dockher hub
+                            console.log(`     > Marking as latest for GitHub`)
+                            await docker.buildxImage(
+                                buildConfig,
+                                {
+                                    t: `ghcr.io/${GITHUB_USER}/${IMAGE_NAME}:${paperVersion}`,
+                                    buildargs: buildArgs
+                                },
+                                IMAGE_PLATFORMS.split(','),
+                                true
+                            );
+                        }
                     } catch (e) {
                         console.log(e);
                     }
-                }
-
-                // publish if latest for build
-                if (paperBuild.latest) {
-                    // dockher hub
-                    console.log(` > Marking as latest for Docker Hub`)
-                    await docker.buildxImage(
-                        buildConfig,
-                        {
-                            t: `${DOCKER_NAMESPACE}/${IMAGE_NAME}:${paperVersion}`,
-                            buildargs: buildArgs
-                        },
-                        IMAGE_PLATFORMS.split(','),
-                        true
-                    );
-
-                    // github hub
-                    console.log(` > Marking as latest for GitHub`)
-                    await docker.buildxImage(
-                        buildConfig,
-                        {
-                            t: `ghcr.io/${GITHUB_USER}/${IMAGE_NAME}:${paperVersion}`,
-                            buildargs: buildArgs
-                        },
-                        IMAGE_PLATFORMS.split(','),
-                        true
-                    );
+                } else {
+                    console.log(`   > Not pushing to GitHub`)
                 }
             } catch (e) {
                 console.log(e);
                 process.exit(-1);
             }
-        } else {
-            console.log(` > Skipped ${paperBuild.id} (already at remote)`)
         }
 
     }
