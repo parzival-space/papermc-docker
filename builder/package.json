@@ -6,13 +6,12 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/dockerode": "^3.3.23",
-    "axios": "^1.6.1",
-    "dockerode": "^4.0.0"
+    "axios": "^1.6.1"
   }
 }
