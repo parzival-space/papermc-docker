@@ -52,20 +52,17 @@ for (const paperVersion of await paper.getPaperVersions()) {
             const tagString = `${IMAGE_NAME}:${paperVersion}-${paperBuild}`;
             try {
                 // build images using docker
-                await docker.buildImage(
-                    {
-                        context: join('..', 'container'),
-                        src: [ 'Dockerfile' ]
-                    },
+                await docker.buildxImage(
+                    join('..', 'container', 'Dockerfile'),
                     {
                         t: tagString,
-                        platform: IMAGE_PLATFORMS,
                         buildargs: {
                             "JAVA_VERSION": `${javaVersion}`,
                             "PAPER_VERSION": `${paperVersion}`,
                             "PAPER_BUILD": `${paperBuild}`
                         }
-                    }
+                    },
+                    IMAGE_PLATFORMS.split(',')
                 );
 
                 // push image
