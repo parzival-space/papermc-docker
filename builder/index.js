@@ -1,5 +1,5 @@
-import packageJson from './package.json' assert { type: 'json' };
-import { join } from 'path';
+import packageJson from './package.json' assert {type: 'json'};
+import {join} from 'path';
 import SimpleDocker from "./utils/simple-docker.js";
 import {PaperAPI} from "./utils/paper-api.js";
 import {MojangAPI} from "./utils/mojang-api.js";
@@ -37,14 +37,14 @@ await docker.login(GITHUB_USER, GITHUB_TOKEN, "ghcr.io");
 // build images
 for (const paperVersion of await paper.getPaperVersions()) {
     console.log(`Paper ${paperVersion}`)
-    
+
     for (const paperBuild of await paper.getPaperBuilds(paperVersion)) {
         const tagName = `${paperVersion}-${paperBuild.id}`;
-        
+
         // only build & push image if not already in registry
-        const buildForDockerHub = ! dockerVersions.includes(tagName);
+        const buildForDockerHub = !dockerVersions.includes(tagName);
         const buildForGitHub = !githubVersions.includes(tagName) && repo.hasGitHubToken();
-        
+
         if (buildForDockerHub || buildForGitHub) {
             console.log(` > Build ${paperBuild.id} (Latest: ${paperBuild.latest})`)
 
@@ -54,8 +54,12 @@ for (const paperVersion of await paper.getPaperVersions()) {
 
             // image config
             const tagString = `${IMAGE_NAME}:${tagName}`;
-            const buildConfig = { context: join('..', 'container'), dockerfile: 'Dockerfile' };
-            const buildArgs = { "JAVA_VERSION": `${javaVersion}`, "PAPER_VERSION": `${paperVersion}`, "PAPER_BUILD": `${paperBuild.id}` };
+            const buildConfig = {context: join('..', 'container'), dockerfile: 'Dockerfile'};
+            const buildArgs = {
+                "JAVA_VERSION": `${javaVersion}`,
+                "PAPER_VERSION": `${paperVersion}`,
+                "PAPER_BUILD": `${paperBuild.id}`
+            };
 
             try {
                 // push image
@@ -93,7 +97,7 @@ for (const paperVersion of await paper.getPaperVersions()) {
                         console.log(e);
                     }
                 }
-                
+
                 // publish if latest for build
                 if (paperBuild.latest) {
                     // dockher hub
@@ -107,7 +111,7 @@ for (const paperVersion of await paper.getPaperVersions()) {
                         IMAGE_PLATFORMS.split(','),
                         true
                     );
-                    
+
                     // github hub
                     console.log(` > Marking as latest for GitHub`)
                     await docker.buildxImage(
@@ -124,12 +128,10 @@ for (const paperVersion of await paper.getPaperVersions()) {
                 console.log(e);
                 process.exit(-1);
             }
-        }
-        else {
+        } else {
             console.log(` > Skipped ${paperBuild}`)
         }
-        
-        
+
     }
 }
 

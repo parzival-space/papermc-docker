@@ -13,7 +13,7 @@ export class PaperAPI {
             }
         });
     }
-    
+
     /** @returns {Promise<Array<String>>} */
     async getPaperVersions() {
         const versionsRaw = await this.#agent.get("/projects/paper");
@@ -28,6 +28,8 @@ export class PaperAPI {
         const builds = buildsRaw.data.builds ?? [];
         builds.sort((a, b) => new Date(a.time) - new Date(b.time));
 
-        return builds.map((build, index) => { return { id: build.build, time: new Date(build.time), latest: index === builds.length-1 }});
+        return builds.map((build, index) => {
+            return {id: build.build, time: new Date(build.time), latest: index === builds.length - 1}
+        });
     }
 }

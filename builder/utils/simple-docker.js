@@ -1,5 +1,5 @@
-import { exec } from 'child_process';
-import { join } from 'path';
+import {exec} from 'child_process';
+import {join} from 'path';
 
 export default class SimpleDocker {
     async #asyncCommand(command) {

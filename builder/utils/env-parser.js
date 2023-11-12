@@ -1,4 +1,3 @@
-
 /** @param {String} name
  *  @param {String} fallback
  *  @returns {String} */

@@ -3,7 +3,7 @@ import axios from 'axios';
 export default class RepositoryAPI {
     /** @type {AxiosInstance} */
     #agent;
-    
+
     /** @type {String | undefined} */
     #githubToken;
 
@@ -24,7 +24,7 @@ export default class RepositoryAPI {
         /** @type {Array<String>} */
         let tags = [];
         let nextPage = `https://hub.docker.com/v2/namespaces/${namespace}/repositories/${repostiroy}/tags?page_size=100`;
-        
+
         while (nextPage !== null) {
             const response = await this.#agent.get(nextPage);
             tags.push(...response.data?.results.map(tag => tag.name));
@@ -32,7 +32,7 @@ export default class RepositoryAPI {
             // load next page if possible
             nextPage = response.data?.next ?? null;
         }
-        
+
         return tags;
     }
 
@@ -42,29 +42,28 @@ export default class RepositoryAPI {
     async getGitHubVersions(username, container) {
         /** @type {Array<String>} */
         let tags = [];
-        
+
         try {
             const response =
-            await this.#agent.get(`https://api.github.com/users/${username}/packages/container/${container}/versions`, {
-                headers: {
-                    "Authorization": `Bearer ${this.#githubToken}`,
-                    "X-GitHub-Api-Version": "2022-11-28"
-                }
-            });
+                await this.#agent.get(`https://api.github.com/users/${username}/packages/container/${container}/versions`, {
+                    headers: {
+                        "Authorization": `Bearer ${this.#githubToken}`,
+                        "X-GitHub-Api-Version": "2022-11-28"
+                    }
+                });
 
             response.data.forEach(version => {
                 /** @type {Array<String>} */
                 const versionTags = version.metadata.container.tags;
                 tags.push(...versionTags);
             })
-        }
-        catch (e) {
+        } catch (e) {
             console.warn(`Failed to fetch published image versions. Are there even any images yet?`, e);
         }
-        
+
         return tags;
     }
-    
+
     hasGitHubToken() {
         return this.#githubToken !== undefined &&
             this.#githubToken !== "" &&
