@@ -37,7 +37,7 @@ export default class SimpleDocker {
      *  @param {Array<String>} platforms
      *  @returns {Promise<String>} */
     async buildxImage(file, options, platforms = []) {
-        const buildArgsString = Object.keys(options.buildargs).map(buildArgName => `--build-args ${buildArgName}=${options.buildargs[buildArgName]}`).join(' ');
+        const buildArgsString = Object.keys(options.buildargs).map(buildArgName => `--build-arg ${buildArgName}=${options.buildargs[buildArgName]}`).join(' ');
         const buildxCommand = `docker buildx build --platform ${platforms.join(',')} ${buildArgsString} -t ${options.t} -f ${file}`;
         return await new Promise((resolve, reject) => {
             exec(buildxCommand, (err, stdout, stderr) => {
