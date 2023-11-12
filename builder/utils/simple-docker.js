@@ -27,7 +27,7 @@ export default class SimpleDocker {
             `${buildArgsString} ` +
             `-t ${options.t} ` +
             `-f ${join(config.context, config.dockerfile)} ` +
-            `${doPush ? '--push' : ''}` +
+            `${doPush ? '--push ' : ''}` +
             `${config.context}`;
 
         return await this.#asyncCommand(buildxCommand);
