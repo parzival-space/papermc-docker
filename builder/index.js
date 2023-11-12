@@ -1,5 +1,4 @@
 import packageJson from './package.json' assert { type: 'json' };
-
 import { join } from 'path';
 import SimpleDocker from "./utils/simple-docker.js";
 import {PaperAPI} from "./utils/paper-api.js";
@@ -7,13 +6,13 @@ import {MojangAPI} from "./utils/mojang-api.js";
 import RepositoryAPI from "./utils/repository-api.js";
 import {defaultEnv, throwEnv} from "./utils/env-parser.js";
 
-// handle envs
-const IMAGE_NAME = defaultEnv("S_IMAGE_NAME", "papermc");
-const IMAGE_PLATFORMS = defaultEnv("S_IMAGE_PLATFORMS", "linux/arm/v7,linux/arm64/v8,linux/amd64");
-const DOCKER_NAMESPACE = throwEnv("S_DOCKER_NAMESPACE", "S_DOCKER_NAMESPACE env missing!")
-const DOCKER_TOKEN = throwEnv("S_DOCKER_TOKEN", "S_DOCKER_TOKEN env missing!")
-const GITHUB_USER = throwEnv("S_GITHUB_USER", "S_GITHUB_USER env missing!")
-const GITHUB_TOKEN = throwEnv("S_GITHUB_TOKEN", "S_GITHUB_TOKEN env missing!")
+// parse envs
+const IMAGE_NAME = defaultEnv("VAR_IMAGE_NAME", "papermc");
+const IMAGE_PLATFORMS = defaultEnv("VAR_IMAGE_PLATFORMS", "linux/arm/v7,linux/arm64/v8,linux/amd64");
+const DOCKER_NAMESPACE = throwEnv("VAR_DOCKER_NAMESPACE", "VAR_DOCKER_NAMESPACE env missing!")
+const DOCKER_TOKEN = throwEnv("VAR_DOCKER_TOKEN", "VAR_DOCKER_TOKEN env missing!")
+const GITHUB_USER = throwEnv("VAR_GITHUB_USER", "VAR_GITHUB_USER env missing!")
+const GITHUB_TOKEN = throwEnv("VAR_GITHUB_TOKEN", "VAR_GITHUB_TOKEN env missing!")
 
 // configure docker
 const docker = new SimpleDocker()
@@ -40,7 +39,7 @@ for (const paperVersion of await paper.getPaperVersions()) {
     console.log(`Paper ${paperVersion}`)
     
     for (const paperBuild of await paper.getPaperBuilds(paperVersion)) {
-        const tagName = `${paperVersion}-${paperBuild}`;
+        const tagName = `${paperVersion}-${paperBuild.id}`;
         
         // only build & push image if not already in registry
         const buildForDockerHub = ! dockerVersions.includes(tagName);
@@ -93,6 +92,33 @@ for (const paperVersion of await paper.getPaperVersions()) {
                     } catch (e) {
                         console.log(e);
                     }
+                }
+                
+                // publish if latest for build
+                if (paperBuild.latest) {
+                    // dockher hub
+                    console.log(` > Marking as latest for Docker Hub`)
+                    await docker.buildxImage(
+                        buildConfig,
+                        {
+                            t: `${DOCKER_NAMESPACE}/${IMAGE_NAME}:${paperVersion}`,
+                            buildargs: buildArgs
+                        },
+                        IMAGE_PLATFORMS.split(','),
+                        true
+                    );
+                    
+                    // github hub
+                    console.log(` > Marking as latest for GitHub`)
+                    await docker.buildxImage(
+                        buildConfig,
+                        {
+                            t: `ghcr.io/${GITHUB_USER}/${IMAGE_NAME}:${paperVersion}`,
+                            buildargs: buildArgs
+                        },
+                        IMAGE_PLATFORMS.split(','),
+                        true
+                    );
                 }
             } catch (e) {
                 console.log(e);

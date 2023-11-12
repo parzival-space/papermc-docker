@@ -30,12 +30,12 @@ jobs:
     - name: Run Script
       working-directory: ./builder
       env:
-        S_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
-        S_IMAGE_PLATFORMS: ${{ vars.TARGET_PLATFORMS }}
-        S_DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
-        S_DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-        S_GITHUB_USER: ${{ github.repository_owner }}
-        S_GITHUB_TOKEN: ${{ github.token }}
+        VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+        VAR_IMAGE_PLATFORMS: ${{ vars.TARGET_PLATFORMS }}
+        VAR_DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
+        VAR_DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+        VAR_GITHUB_USER: ${{ github.repository_owner }}
+        VAR_GITHUB_TOKEN: ${{ github.token }}
       run: |
         npm ci
         node .
