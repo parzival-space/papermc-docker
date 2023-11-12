@@ -9,6 +9,7 @@ import {defaultEnv, throwEnv} from "./utils/env-parser.js";
 
 // handle envs
 const IMAGE_NAME = defaultEnv("S_IMAGE_NAME", "papermc");
+const IMAGE_PLATFORMS = defaultEnv("S_IMAGE_PLATFORMS", "linux/arm/v7,linux/arm64/v8,linux/amd64");
 const DOCKER_NAMESPACE = throwEnv("S_DOCKER_ENV", "S_DOCKER_NAMESPACE env missing!")
 const DOCKER_TOKEN = throwEnv("S_DOCKER_TOKEN", "S_DOCKER_TOKEN env missing!")
 const GITHUB_USER = throwEnv("S_GITHUB_USER", "S_GITHUB_USER env missing!")
@@ -58,6 +59,7 @@ for (const paperVersion of await paper.getPaperVersions()) {
                     },
                     {
                         t: tagString,
+                        platform: IMAGE_PLATFORMS,
                         buildargs: {
                             "JAVA_VERSION": `${javaVersion}`,
                             "PAPER_VERSION": `${paperVersion}`,
