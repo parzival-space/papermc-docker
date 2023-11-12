@@ -46,16 +46,16 @@ for (const paperVersion of await paper.getPaperVersions()) {
         const buildForGitHub = !githubVersions.includes(tagName) && repo.hasGitHubToken();
         
         if (buildForDockerHub || buildForGitHub) {
-            console.log(` > Build ${paperBuild}`)
+            console.log(` > Build ${paperBuild.id} (Latest: ${paperBuild.latest})`)
 
             // get required java version
             /** @type {Number} */
             const javaVersion = javaCache[paperVersion] ?? (javaCache[paperVersion] = await mojang.getJavaVersion(paperVersion));
 
             // image config
-            const tagString = `${IMAGE_NAME}:${paperVersion}-${paperBuild}`;
+            const tagString = `${IMAGE_NAME}:${tagName}`;
             const buildConfig = { context: join('..', 'container'), dockerfile: 'Dockerfile' };
-            const buildArgs = { "JAVA_VERSION": `${javaVersion}`, "PAPER_VERSION": `${paperVersion}`, "PAPER_BUILD": `${paperBuild}` };
+            const buildArgs = { "JAVA_VERSION": `${javaVersion}`, "PAPER_VERSION": `${paperVersion}`, "PAPER_BUILD": `${paperBuild.id}` };
 
             try {
                 // push image
