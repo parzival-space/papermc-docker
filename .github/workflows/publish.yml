@@ -30,12 +30,12 @@ jobs:
     - name: Run Script
       working-directory: ./builder
       env:
-        S_IMAGE_NAME: "papermc"
-        S_IMAGE_PLATFORMS: "linux/arm/v7,linux/arm64/v8,linux/amd64"
-        S_DOCKER_NAMESPACE: "parzivalspace"
-        S_DOCKER_TOKEN: ""
-        S_GITHUB_USER: "parzival-space"
-        S_GITHUB_TOKEN: ""
+        S_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+        S_IMAGE_PLATFORMS: ${{ vars.TARGET_PLATFORMS }}
+        S_DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
+        S_DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+        S_GITHUB_USER: ${{ github.repository_owner }}
+        S_GITHUB_TOKEN: ${{ github.token }}
       run: |
         npm ci
         node .
