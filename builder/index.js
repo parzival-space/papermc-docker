@@ -129,7 +129,7 @@ for (const paperVersion of await paper.getPaperVersions()) {
                 process.exit(-1);
             }
         } else {
-            console.log(` > Skipped ${paperBuild}`)
+            console.log(` > Skipped ${paperBuild.id} (already at remote)`)
         }
 
     }
