@@ -32,13 +32,13 @@ export default class SimpleDocker {
         return await this.#followProgress(buildStream);
     }
 
-    /** @param {string} file
+    /** @param {{ context: String, dockerfile: String }} config
      *  @param {Dockerode.ImageBuildOptions} options
      *  @param {Array<String>} platforms
      *  @returns {Promise<String>} */
-    async buildxImage(file, options, platforms = []) {
+    async buildxImage(config, options, platforms = []) {
         const buildArgsString = Object.keys(options.buildargs).map(buildArgName => `--build-arg ${buildArgName}=${options.buildargs[buildArgName]}`).join(' ');
-        const buildxCommand = `docker buildx build --platform ${platforms.join(',')} ${buildArgsString} -t ${options.t} -f ${file}`;
+        const buildxCommand = `docker buildx build --platform ${platforms.join(',')} ${buildArgsString} -t ${options.t} -f ${config.dockerfile} ${config.context}`;
         return await new Promise((resolve, reject) => {
             exec(buildxCommand, (err, stdout, stderr) => {
                 if (err) {

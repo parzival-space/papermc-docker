@@ -53,7 +53,10 @@ for (const paperVersion of await paper.getPaperVersions()) {
             try {
                 // build images using docker
                 await docker.buildxImage(
-                    join('..', 'container', 'Dockerfile'),
+                    {
+                        context: join('..', 'container'),
+                        dockerfile: 'Dockerfile'
+                    },
                     {
                         t: tagString,
                         buildargs: {
