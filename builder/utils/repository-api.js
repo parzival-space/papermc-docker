@@ -51,7 +51,7 @@ export default class RepositoryAPI {
         /** @type {Array<String>} */
         let tags = [];
         
-        if (response.data.message === "Package not found.") return tags;
+        if (response.status === 404) return tags;
 
         response.data.forEach(version => {
             /** @type {Array<String>} */
