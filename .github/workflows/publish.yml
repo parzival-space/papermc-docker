@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: automated-publish-task
-  cancel-in-progresss: true
+  cancel-in-progress: true
 
 jobs:
 
