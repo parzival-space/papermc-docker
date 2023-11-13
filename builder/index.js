@@ -24,6 +24,7 @@ const mojang = new MojangAPI(agentString);
 const repo = new RepositoryAPI(GITHUB_TOKEN, agentString);
 
 // repository tags
+console.log(`Fetching already published image versions...`)
 const dockerVersions = await repo.getDockerHubVersions(DOCKER_NAMESPACE, IMAGE_NAME);
 const githubVersions = await repo.getGitHubVersions(GITHUB_USER, IMAGE_NAME);
 
@@ -31,6 +32,7 @@ const githubVersions = await repo.getGitHubVersions(GITHUB_USER, IMAGE_NAME);
 const javaCache = {};
 
 // login to registries
+console.log(`Connecting to image repositories...`)
 await docker.login(DOCKER_NAMESPACE, DOCKER_TOKEN, "");
 await docker.login(GITHUB_USER, GITHUB_TOKEN, "ghcr.io");
 
@@ -140,7 +142,3 @@ for (const paperVersion of await paper.getPaperVersions()) {
 
     }
 }
-
-// https://api.papermc.io/v2/projects/paper/versions/1.13-pre7/builds/1/downloads/paper-1.13-pre7-1.jar
-
-//await fs.writeFile("builds.json", JSON.stringify(builds))

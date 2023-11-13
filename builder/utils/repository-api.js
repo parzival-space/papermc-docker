@@ -42,24 +42,40 @@ export default class RepositoryAPI {
     async getGitHubVersions(username, container) {
         /** @type {Array<String>} */
         let tags = [];
+        let nextPage = 1;
 
-        try {
-            const response =
-                await this.#agent.get(`https://api.github.com/users/${username}/packages/container/${container}/versions`, {
+        while (nextPage !== -1){
+            try {
+                console.log(`Fetching tags for ${username}/${container}... Page ${nextPage}`)
+
+                const response = await this.#agent.get(`https://api.github.com/users/${username}/packages/container/${container}/versions?per_page=100&page=${nextPage}`, {
                     headers: {
                         "Authorization": `Bearer ${this.#githubToken}`,
                         "X-GitHub-Api-Version": "2022-11-28"
                     }
                 });
+                nextPage++;
 
-            response.data.forEach(version => {
-                /** @type {Array<String>} */
-                const versionTags = version.metadata.container.tags;
-                tags.push(...versionTags);
-            })
-        } catch (e) {
-            console.warn(`Failed to fetch published image versions. Are there even any images yet?`, e);
+                if (response.data.length === 0) {
+                    // no more data
+                    nextPage = -1;
+                } else {
+                    response.data.forEach(version => {
+                        /** @type {Array<String>} */
+                        const versionTags = version.metadata.container.tags;
+                        tags.push(...versionTags);
+                    });
+                }
+            } catch (e) {
+                if (nextPage === 1) {
+                    console.warn(`Failed to fetch published image versions. Are there even any images yet?`);
+                } else {
+                    console.log(e);
+                }
+                nextPage = -1;
+            }
         }
+
 
         return tags;
     }
